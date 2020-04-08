@@ -26,7 +26,6 @@ const db = require(path.join(__dirname, '../db'));
 db.authenticate()
   .then(() => {
     console.log('Connection has been established successfully.');
-
   })
   .catch((err) => console.error(err))
 
