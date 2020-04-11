@@ -1,33 +1,8 @@
 const Joi = require('@hapi/joi');
-var passport = require("passport");
-var bcrypt = require("bcryptjs");
+const bcrypt = require("bcryptjs");
 
-// ========== PASSPORT JS ==========
-var jwt = require('jsonwebtoken');
-var passportJWT = require("passport-jwt");
-
-var ExtractJwt = passportJWT.ExtractJwt;
-var JwtStrategy = passportJWT.Strategy;
-
-var jwtOptions = {}
-jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-jwtOptions.secretOrKey = 'danil00524';
-
-var strategy = new JwtStrategy(jwtOptions, async (jwt_payload, next) => {
-  console.log('payload received', jwt_payload);
-
-  const user = await User.findOne({ where: { id: jwt_payload.id } });
-  if (user) {
-    next(null, user);
-  } else {
-    next(null, false);
-  }
-});
-
-passport.use(strategy);
-
-// TODO? ^^^ Как его вынести в отдельный модуль??? ^^^
-// ========== PASSPORT JS ==========
+const jwt = require('jsonwebtoken');
+const jwtOptions = require('../config-passport');
 
 // ========== VALIDATION ==========
 
@@ -61,8 +36,8 @@ module.exports = {
       const statusValidate = await bcrypt.compare(password, user.password)
 
       if (statusValidate) {
-        var payload = { id: user.id };
-        var token = jwt.sign(payload, jwtOptions.secretOrKey);
+        const payload = { id: user.id };
+        const token = jwt.sign(payload, jwtOptions.secretOrKey);
         res.json({ success: true, message: "Аутентификация прошла успешно.", token: token, user });
       } else {
         res.status(401).json({ success: false, message: "Пароль не верный." });
