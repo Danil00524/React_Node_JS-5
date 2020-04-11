@@ -1,43 +1,61 @@
-const passport = require('passport');
-var _ = require('lodash');
-var jwt = require('jsonwebtoken');
+// const passport = require('passport');
+// var _ = require('lodash');
+// var jwt = require('jsonwebtoken');
 
-var passportJWT = require("passport-jwt");
+// var passportJWT = require("passport-jwt");
 
-var ExtractJwt = passportJWT.ExtractJwt;
-var JwtStrategy = passportJWT.Strategy;
+// var ExtractJwt = passportJWT.ExtractJwt;
+// var JwtStrategy = passportJWT.Strategy;
 
-var jwtOptions = {}
-jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();;
-jwtOptions.secretOrKey = 'tasmanianDevil';
+// var jwtOptions = {}
+// jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();;
+// jwtOptions.secretOrKey = 'tasmanianDevil';
 
-var users = [
-    {
-        id: 1,
-        name: 'jonathanmh',
-        password: '%2yx4'
-    },
-    {
-        id: 2,
-        name: 'test',
-        password: 'test'
-    }
-];
+// var users = [
+//     {
+//         id: 1,
+//         name: 'jonathanmh',
+//         password: '%2yx4'
+//     },
+//     {
+//         id: 2,
+//         name: 'test',
+//         password: 'test'
+//     }
+// ];
 
-var strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
-    console.log('payload received', jwt_payload);
-    // usually this would be a database call:
-    var user = users[_.findIndex(users, { id: jwt_payload.id })];
-    if (user) {
-        next(null, user);
-    } else {
-        next(null, false);
-    }
-});
+// var strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
+//     console.log('payload received', jwt_payload);
+//     // usually this would be a database call:
+//     var user = users[_.findIndex(users, { id: jwt_payload.id })];
+//     if (user) {
+//         next(null, user);
+//     } else {
+//         next(null, false);
+//     }
+// });
 
-passport.use(strategy);
+// passport.use(strategy);
 
-module.exports = passport;
+// module.exports = passport;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // const LocalStrategy = require('passport-local').Strategy;
