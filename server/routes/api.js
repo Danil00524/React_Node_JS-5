@@ -3,7 +3,7 @@ var passport = require("passport");
 var router = express.Router();
 var bcrypt = require("bcryptjs");
 
-const User = require('../db').models.user;
+const User = require('../db').models.users;
 
 
 // ========== PASSPORT JS ==========
@@ -19,7 +19,7 @@ jwtOptions.secretOrKey = 'danil00524';
 
 var strategy = new JwtStrategy(jwtOptions, async (jwt_payload, next) => {
   console.log('payload received', jwt_payload);
-  // usually this would be a database call:
+
   const user = await User.findOne({ where: { id: jwt_payload.id } });
   if (user) {
     next(null, user);
@@ -45,10 +45,12 @@ router.post("/login", async (req, res) => {
       res.status(401).json({ success: false, message: "Пользователь не найден." });
     }
 
-    if (user.password === password) {
+    const statusValidate = await bcrypt.compare(password, user.password)
+
+    if (statusValidate) {
       var payload = { id: user.id };
       var token = jwt.sign(payload, jwtOptions.secretOrKey);
-      res.json({ success: true, message: "Аутентификация прошла успешно.", token: token });
+      res.json({ success: true, message: "Аутентификация прошла успешно.", token: token, user });
     } else {
       res.status(401).json({ success: false, message: "Пароль не верный." });
     }
@@ -79,56 +81,53 @@ router.get('/signout', (req, res) => {
 });
 
 router.post('/registration', async (req, res, next) => {
-  // TODO! Изначально не правильно создал таблицу с пользователями. Теперь не знаю как добавить туда пару полей.
   try {
     const { username, surName, firstName, middleName, password } = req.body;
     if (!username || !surName || !firstName || !middleName || !password) throw 'Заполните все поля!'
 
+    const hashPassword = await bcrypt.hash(password, 12);
     const data = {
-      username, surName, firstName, middleName, password
+      username, surName, firstName, middleName, password: hashPassword
     }
 
-    // TODO! DONT WORK!
-    // bcrypt.hash(data.password, 10, (err, hash) => {
-    //   data.password = hash;
-    // });
+    const checkTheSameUsername = await User.findOne({ where: { username } });
 
-    const result = await User.create(data);
-    res.json({ success: true, data: result });
+    if (checkTheSameUsername) {
+      res.json({ success: false, message: 'Пользователь с таким ником уже существует.' })
+    } else {
+      const result = await User.create(data);
+      res.json({ success: true, data: result });
+    }
   } catch (err) {
     console.error(err);
     res.json({ success: false, err });
   }
 });
 
-// router.put('/:id', async (req, res, next) => {
-//   try {
-//     const { id } = req.params;
-//     const { username, email, password } = req.body;
-//     const data = {
-//       username,
-//       email,
-//       password
-//     }
+router.patch('/user/:id', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { firstName, middleName, surName, oldPassword, newPassword, avatar } = req.body;
+    const data = { firstName, middleName, surName, oldPassword, newPassword, avatar };
 
-//     const result = await User.update(data, { where: { id } });
-//     res.json({ success: true, data: result });
-//   } catch (err) {
-//     console.error(err);
-//     res.json({ success: false, err });
-//   }
-// });
+    const result = await User.update(data, { where: { id } });
+    res.json({ success: true, data });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, err });
+  }
+});
 
-// router.delete('/:id', async (req, res, next) => {
-//   try {
-//     const { id } = req.params;
+router.delete('/user/:id', async (req, res, next) => {
+  try {
+    const { id } = req.params;
 
-//     const result = await User.destroy({ where: { id } });
-//     res.json({ success: true, data: result });
-//   } catch (err) {
-//     console.error(err);
-//     res.json({ success: false, err });
-//   }
-// });
+    const result = await User.destroy({ where: { id } });
+    res.json({ success: true, data: result });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, err });
+  }
+});
 
 module.exports = router;

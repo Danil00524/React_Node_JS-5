@@ -1,6 +1,7 @@
 {
   "name": "loftschool-nodejs-project",
   "version": "0.1.0",
+  "proxy": "http://localhost:3003",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.3.3",
