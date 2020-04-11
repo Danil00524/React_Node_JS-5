@@ -1,6 +1,7 @@
 var express = require('express');
 var passport = require("passport");
 var router = express.Router();
+var bcrypt = require("bcryptjs");
 
 const User = require('../db').models.user;
 
@@ -14,7 +15,7 @@ var JwtStrategy = passportJWT.Strategy;
 
 var jwtOptions = {}
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-jwtOptions.secretOrKey = 'tasmanianDevil';
+jwtOptions.secretOrKey = 'danil00524';
 
 var strategy = new JwtStrategy(jwtOptions, async (jwt_payload, next) => {
   console.log('payload received', jwt_payload);
@@ -36,9 +37,10 @@ passport.use(strategy);
 
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
+    if (!username || !password) throw 'Заполните все поля!'
 
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ where: { username } });
     if (!user) {
       res.status(401).json({ success: false, message: "Пользователь не найден." });
     }
@@ -57,6 +59,8 @@ router.post("/login", async (req, res) => {
 });
 
 router.get('/profile', (req, res) => {
+  // TODO? Как тут достать данные нужного пользователя?
+  // TODO! При попытке входа, сразу вызывается 'else'. Хотя login произошел.
   if (req.isAuthenticated()) {
     res.json({ success: true, message: 'Доступ разрешен.' })
   } else {
@@ -72,15 +76,22 @@ router.get('/signout', (req, res) => {
     console.log(error);
     res.json({ success: false, message: error })
   }
-
 });
 
 router.post('/registration', async (req, res, next) => {
+  // TODO! Изначально не правильно создал таблицу с пользователями. Теперь не знаю как добавить туда пару полей.
   try {
-    const { email, username, surName, firstName, middleName, password } = req.body;
+    const { username, surName, firstName, middleName, password } = req.body;
+    if (!username || !surName || !firstName || !middleName || !password) throw 'Заполните все поля!'
+
     const data = {
-      username, surName, firstName, middleName, password, email
+      username, surName, firstName, middleName, password
     }
+
+    // TODO! DONT WORK!
+    // bcrypt.hash(data.password, 10, (err, hash) => {
+    //   data.password = hash;
+    // });
 
     const result = await User.create(data);
     res.json({ success: true, data: result });
