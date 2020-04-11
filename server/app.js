@@ -41,8 +41,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const apiRouter = require('./routes/api');
-app.use('/api', apiRouter);
+app.use('/api', require('./routes'));
 
 if (process.env.NODE_ENV === 'production') {
   app.use('/', express.static(path.join(__dirname, '..', 'front-end', 'build')))
