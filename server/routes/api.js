@@ -4,16 +4,45 @@ const passport = require('passport');
 
 const User = require('../db').models.user;
 
+var users = [
+  {
+    id: 1,
+    name: 'jonathanmh',
+    password: '%2yx4'
+  },
+  {
+    id: 2,
+    name: 'test',
+    password: 'test'
+  }
+];
+
 router.post('/login', async (req, res, next) => {
-  passport.authenticate('local', (err, user, info) => {
-    if (err) next(err);
+  const { name = '', password = '' } = req.body;
 
-    if (!user) res.send('Укажите правильный email и пароль!');
+  // usually this would be a database call:
+  const user = users[_.findIndex(users, { name: name })];
 
-    req.login(user, err => {
-      return res.send('Вы удачно прошли аутентификацию!')
-    })
-  })(req, res, next);
+  if (!user) {
+    res.status(401).json({ message: 'Пользователь не найден.' })
+  }
+
+  if (user.password === password) {
+    const payload = { id: user.id };
+    const token = jwt.sign(payload, jwtOptions.secretOrKey);
+    res.json({ message: 'ok', token: token });
+  } else {
+    res.status(401).json({message: 'Неверный пароль.'})
+  }
+  // passport.authenticate('jwt', (err, user, info) => {
+  //   if (err) next(err);
+
+  //   if (!user) res.send('Укажите правильный email и пароль!');
+
+  //   req.login(user, err => {
+  //     return res.send('Вы удачно прошли аутентификацию!')
+  //   })
+  // })(req, res, next);
   // try {
   //   const result = await User.findAll();
   //   res.json({ success: true, data: result });

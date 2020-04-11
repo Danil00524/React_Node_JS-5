@@ -3,15 +3,18 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
+var bodyParser = require("body-parser");
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
-
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const passport = require('./config-passport');
 
 var app = express();
+
+app.use(passport.initialize());
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+app.use(bodyParser.json())
 app.use(
   session({
     store: new FileStore(),
@@ -21,40 +24,8 @@ app.use(
   })
 );
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-passport.deserializeUser((id, done) => {
-  // здесь необходимо найти пользователя с данным id в БД
-  // но он у нас один и мы просто сравниваем
-  const _user = user.id === id ? user : false;
-  done(null, _user);
-});
-
-const user = {
-  id: 1,
-  email: 'email@gmail.com',
-  password: '123',
-};
-
-passport.use(
-  new LocalStrategy(
-    {
-      usernameField: 'email'
-    },
-    (email, password, done) => {
-      if (email === user.email && password === user.password) {
-        return done(null, user);
-      } else {
-        return done(null, false);
-      }
-    }
-  )
-)
+var indexRouter = require('./routes/index');
+var apiRouter = require('./routes/api');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -67,7 +38,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/api', usersRouter);
+app.use('/api', apiRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
