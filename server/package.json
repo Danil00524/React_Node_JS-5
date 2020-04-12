@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon app.js",
+    "start": "nodemon --ignore sessions/ app.js",
     "server": "nodemon --ignore sessions/ app.js",
     "client": "npm run start --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\""

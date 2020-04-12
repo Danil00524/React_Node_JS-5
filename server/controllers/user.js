@@ -47,6 +47,15 @@ module.exports = {
       res.json({ success: false, message: error })
     }
   },
+  authorization: async (req, res) => {
+    // TODO? Как тут достать данные нужного пользователя?
+    // TODO! При попытке входа, сразу вызывается 'else'. Хотя login произошел.
+    if (req.isAuthenticated()) {
+      res.json({ success: true, message: 'Доступ разрешен.' })
+    } else {
+      res.status(403).json({ success: false, message: 'У пользователя нету прав для просмотра данной страницы.' });
+    }
+  },
   logout: async (req, res) => {
     try {
       req.logout();
@@ -77,15 +86,6 @@ module.exports = {
     } catch (err) {
       console.error(err);
       res.json({ success: false, err });
-    }
-  },
-  read: async (req, res) => {
-    // TODO? Как тут достать данные нужного пользователя?
-    // TODO! При попытке входа, сразу вызывается 'else'. Хотя login произошел.
-    if (req.isAuthenticated()) {
-      res.json({ success: true, message: 'Доступ разрешен.' })
-    } else {
-      res.status(403).json({ success: false, message: 'У пользователя нету прав для просмотра данной страницы.' });
     }
   },
   update: async (req, res) => {
