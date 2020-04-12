@@ -4,8 +4,6 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const bodyParser = require("body-parser");
-const session = require('express-session');
-const FileStore = require('session-file-store')(session);
 const passport = require("passport");
 
 const app = express();
@@ -22,14 +20,6 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(bodyParser.json())
-app.use(
-  session({
-    store: new FileStore(),
-    secret: 'secret',
-    resave: false,
-    saveUninitialized: true,
-  })
-);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

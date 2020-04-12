@@ -8,6 +8,8 @@ const jwtOptions = {}
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 jwtOptions.secretOrKey = 'tasmanianDevil';
 
+const User = require('./db').models.users;
+
 const strategy = new JwtStrategy(jwtOptions, async (jwt_payload, next) => {
   console.log('payload received', jwt_payload);
 

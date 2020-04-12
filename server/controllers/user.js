@@ -38,7 +38,28 @@ module.exports = {
       if (statusValidate) {
         const payload = { id: user.id };
         const token = jwt.sign(payload, jwtOptions.secretOrKey);
-        res.json({ success: true, message: "Аутентификация прошла успешно.", token: token, user });
+        const { username, password, surName, firstName, middleName } = user;
+        // const CRUD = await User.findOne({ where: { username } });
+        // TODO! CRUD
+
+        res.json({
+          success: true,
+          message: "Аутентификация прошла успешно.",
+          username,
+          password,
+          surName,
+          firstName,
+          middleName,
+          permission: {
+            chat: { C: true, R: true, U: true, D: true },
+            news: { C: true, R: true, U: true, D: true },
+            settings: { C: true, R: true, U: true, D: true }
+          },
+          acceptToken: token,
+          refreshToken: 'string',
+          accessTokenExpiredAt: 'string',
+          refreshTokenExpiredAt: 'string',
+        });
       } else {
         res.status(401).json({ success: false, message: "Пароль не верный." });
       }
@@ -50,6 +71,8 @@ module.exports = {
   authorization: async (req, res) => {
     // TODO? Как тут достать данные нужного пользователя?
     // TODO! При попытке входа, сразу вызывается 'else'. Хотя login произошел.
+    console.log(555);
+    
     if (req.isAuthenticated()) {
       res.json({ success: true, message: 'Доступ разрешен.' })
     } else {
