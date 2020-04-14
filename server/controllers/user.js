@@ -79,6 +79,30 @@ module.exports = {
       res.json({ success: false, message: error })
     }
   },
+  list: async (req, res) => {
+    try {
+      const users = await User.findAll();
+
+      const shortUsersInfo = users.map((user) => {
+        return {
+          username: user.username,
+          middleName: user.middleName,
+          surName: user.surName,
+          firstName: user.firstName
+        }
+      })
+
+      res.json({
+        success: true,
+        users: shortUsersInfo,
+      })
+    } catch (error) {
+      res.json({
+        success: false,
+        error
+      })
+    }
+  },
   create: async (req, res) => {
     try {
       const { username, surName, firstName, middleName, password } = req.body;

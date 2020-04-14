@@ -1,9 +1,9 @@
-const fs        = require('fs');
-const path      = require('path');
+const fs = require('fs');
+const path = require('path');
 const Sequelize = require('sequelize');
-const env       = process.env.NODE_ENV || 'development';
-const config    = require(path.join(__dirname, './config.js'))[env];
-let models      = {};
+const env = process.env.NODE_ENV || 'development';
+const config = require(path.join(__dirname, './config.js'))[env];
+let models = {};
 const modelsFolderPath = './models';
 
 const sequelize = new Sequelize(`postgres://${config.username}:${config.password}@${config.host}/${config.database}`, config);

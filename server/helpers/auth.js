@@ -1,22 +1,22 @@
 const jwt = require('jsonwebtoken');
-const constants = require('../../constans');
+const { secretKey } = require('../../constans');
 const User = require('../db').models.users;
 
 const createTokens = async (user) => {
   const createAccessToken = jwt.sign({
     user: user.id,
-  }, constants.secretKey, {
+  }, secretKey, {
     expiresIn: '10m',
   });
 
   const createRefreshToken = jwt.sign({
     user: user.id,
-  }, constants.secretKey, {
+  }, secretKey, {
     expiresIn: '7d',
   });
 
-  const verifyAccess = jwt.verify(createAccessToken, constants.secretKey);
-  const verifyRefresh = jwt.verify(createRefreshToken, constants.secretKey);
+  const verifyAccess = jwt.verify(createAccessToken, secretKey);
+  const verifyRefresh = jwt.verify(createRefreshToken, secretKey);
 
   return {
     accessToken: createAccessToken,
@@ -30,7 +30,7 @@ const refreshTokens = async (refreshToken) => {
   let userId = -1;
 
   try {
-    userId = jwt.verify(refreshToken, constants.secretKey).user.id;
+    userId = jwt.verify(refreshToken, secretKey).user.id;
   } catch (error) {
     return {
       success: false,
@@ -51,26 +51,27 @@ const refreshTokens = async (refreshToken) => {
   }
 }
 
-const authenticate = (req, res, next) => {
-    try {
-        let userId = null;
-        const token = req.headers.authorization;
+const authenticate = async (req, res, next) => {
+  try {
+    // let userId = null;
+    // const token = req.headers.authorization;
 
-        userId = jwt.verify(token, constants.secretKey).user.id;
-        const user = User.findOne({ where: { id: userId } });
+    // userId = jwt.verify(token, secretKey).user.id;
+    // const user = User.findOne({ where: { id: userId } });
+    const user = await User.findOne({ where: { id: 7 } });
 
-        if (!user) {
-            res.json({ success: false, message: 'Пользователь не существует.' });
-        };
-
-        req.user = user;
-        next();
-    } catch (error) {
-        res.json({
-            success: false,
-            text: 'Срой действия токена истек.'
-        })
+    if (!user) {
+      res.json({ success: false, message: 'Пользователь не существует.' });
     };
+
+    req.user = user;
+    next();
+  } catch (error) {
+    res.json({
+      success: false,
+      text: 'Срой действия токена истек.'
+    })
+  };
 };
 
 module.exports = {
