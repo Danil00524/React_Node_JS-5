@@ -4,7 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const bodyParser = require("body-parser");
-const passport = require("passport");
+// const passport = require("passport");
 
 const app = express();
 
@@ -15,7 +15,7 @@ db.authenticate()
   })
   .catch((err) => console.error(err))
 
-app.use(passport.initialize());
+// app.use(passport.initialize());
 app.use(bodyParser.urlencoded({
   extended: true
 }));

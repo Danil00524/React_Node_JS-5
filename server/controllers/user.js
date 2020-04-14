@@ -2,7 +2,8 @@ const Joi = require('@hapi/joi');
 const bcrypt = require("bcryptjs");
 
 const jwt = require('jsonwebtoken');
-const jwtOptions = require('../config-passport');
+const auth = require('../helpers/auth');
+const constants = require('../../constans');
 
 // ========== VALIDATION ==========
 
@@ -36,8 +37,7 @@ module.exports = {
       const statusValidate = await bcrypt.compare(password, user.password)
 
       if (statusValidate) {
-        const payload = { id: user.id };
-        const token = jwt.sign(payload, jwtOptions.secretOrKey);
+        const tokens = await auth.createTokens(user);
         const { username, password, surName, firstName, middleName } = user;
         // const CRUD = await User.findOne({ where: { username } });
         // TODO! CRUD
@@ -55,10 +55,7 @@ module.exports = {
             news: { C: true, R: true, U: true, D: true },
             settings: { C: true, R: true, U: true, D: true }
           },
-          acceptToken: token,
-          refreshToken: 'string',
-          accessTokenExpiredAt: 'string',
-          refreshTokenExpiredAt: 'string',
+          ...tokens
         });
       } else {
         res.status(401).json({ success: false, message: "Пароль не верный." });
@@ -69,15 +66,37 @@ module.exports = {
     }
   },
   authorization: async (req, res) => {
-    // TODO? Как тут достать данные нужного пользователя?
-    // TODO! При попытке входа, сразу вызывается 'else'. Хотя login произошел.
-    console.log(555);
-    
-    if (req.isAuthenticated()) {
-      res.json({ success: true, message: 'Доступ разрешен.' })
-    } else {
-      res.status(403).json({ success: false, message: 'У пользователя нету прав для просмотра данной страницы.' });
+    const token = req.headers['authorization'];
+    let userId = -1;
+
+    try {
+      userId = jwt.verify(token, constants.secretKey).user.id;
+      const user = await User.findOne({ where: { id: userId } });
+
+      if (!user) {
+        res.json({ success: false, message: 'Пользователь не существует.' });
+      }
+
+      const { username, password, surName, firstName, middleName } = user;
+
+      res.json({
+        success: true,
+        username,
+        password,
+        surName,
+        firstName,
+        middleName
+      });
+    } catch (error) {
+      res.json({
+        success: false,
+        text: 'Access token устаревший.',
+        error: error.message,
+      });
     }
+  },
+  refreshToken: async (req, res) => {
+    s
   },
   logout: async (req, res) => {
     try {
