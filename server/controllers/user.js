@@ -1,29 +1,7 @@
-const Joi = require('@hapi/joi');
 const bcrypt = require("bcryptjs");
 const auth = require('../helpers/auth');
-
-// ========== VALIDATION ==========
-
-const schemaRegistration = Joi.object().keys({
-  username: Joi.string().required(),
-  surName: Joi.string().required(),
-  firstName: Joi.string().required(),
-  middleName: Joi.string().required(),
-  password: Joi.string().required(),
-});
-
-const schemaUpdateProfileInfo = Joi.object().keys({
-  firstName: Joi.string().required(),
-  middleName: Joi.string().required(),
-  surName: Joi.string().required(),
-  oldPassword: Joi.string().required(),
-  newPassword: Joi.string().required(),
-  avatar: Joi.string().required(),
-});
-
-// ========== VALIDATION ==========
-
 const User = require('../db').models.users;
+const { schemaRegistration, schemaUpdateProfileInfo } = require('../helpers/schemas');
 
 module.exports = {
   authenticate: async (req, res) => {

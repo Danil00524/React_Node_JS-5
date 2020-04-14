@@ -51,7 +51,30 @@ const refreshTokens = async (refreshToken) => {
   }
 }
 
+const authenticate = (req, res, next) => {
+    try {
+        let userId = null;
+        const token = req.headers.authorization;
+
+        userId = jwt.verify(token, constants.secretKey).user.id;
+        const user = User.findOne({ where: { id: userId } });
+
+        if (!user) {
+            res.json({ success: false, message: 'Пользователь не существует.' });
+        };
+
+        req.user = user;
+        next();
+    } catch (error) {
+        res.json({
+            success: false,
+            text: 'Срой действия токена истек.'
+        })
+    };
+};
+
 module.exports = {
   createTokens,
   refreshTokens,
+  authenticate,
 }
