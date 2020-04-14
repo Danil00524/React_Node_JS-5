@@ -1,22 +1,24 @@
 const Joi = require('@hapi/joi');
 const bcrypt = require("bcryptjs");
-
-const jwt = require('jsonwebtoken');
 const auth = require('../helpers/auth');
-const constants = require('../../constans');
 
 // ========== VALIDATION ==========
 
 const schemaRegistration = Joi.object().keys({
-  name: Joi.string().required(),
-  price: Joi.number().required(),
-  photo: Joi.required(),
+  username: Joi.string().required(),
+  surName: Joi.string().required(),
+  firstName: Joi.string().required(),
+  middleName: Joi.string().required(),
+  password: Joi.string().required(),
 });
+
 const schemaUpdateProfileInfo = Joi.object().keys({
-  age: Joi.number().required(),
-  concerts: Joi.number().required(),
-  cities: Joi.number().required(),
-  years: Joi.number().required(),
+  firstName: Joi.string().required(),
+  middleName: Joi.string().required(),
+  surName: Joi.string().required(),
+  oldPassword: Joi.string().required(),
+  newPassword: Joi.string().required(),
+  avatar: Joi.string().required(),
 });
 
 // ========== VALIDATION ==========
@@ -66,18 +68,8 @@ module.exports = {
     }
   },
   authorization: async (req, res) => {
-    const token = req.headers['authorization'];
-    let userId = -1;
-
     try {
-      userId = jwt.verify(token, constants.secretKey).user.id;
-      const user = await User.findOne({ where: { id: userId } });
-
-      if (!user) {
-        res.json({ success: false, message: 'Пользователь не существует.' });
-      }
-
-      const { username, password, surName, firstName, middleName } = user;
+      const { username, password, surName, firstName, middleName } = req.user;
 
       res.json({
         success: true,
@@ -90,13 +82,15 @@ module.exports = {
     } catch (error) {
       res.json({
         success: false,
-        text: 'Access token устаревший.',
         error: error.message,
       });
     }
   },
   refreshToken: async (req, res) => {
-    s
+    const refreshToken = req.headers.authorization;
+    const data = await auth.refreshTokens(refreshToken);
+
+    res.json(data);
   },
   logout: async (req, res) => {
     try {
@@ -110,7 +104,7 @@ module.exports = {
   create: async (req, res) => {
     try {
       const { username, surName, firstName, middleName, password } = req.body;
-      if (!username || !surName || !firstName || !middleName || !password) throw 'Заполните все поля!'
+      const value = await schemaRegistration.validateAsync({ username, surName, firstName, middleName, password });
 
       const hashPassword = await bcrypt.hash(password, 12);
       const data = {
@@ -133,7 +127,7 @@ module.exports = {
   update: async (req, res) => {
     try {
       const { id } = req.params;
-      const { firstName, middleName, surName, oldPassword, newPassword, avatar } = req.body;
+      const value = schemaUpdateProfileInfo.validateAsync(req.body);
       const data = { firstName, middleName, surName, oldPassword, newPassword, avatar };
 
       const result = await User.update(data, { where: { id } });
