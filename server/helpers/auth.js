@@ -53,12 +53,12 @@ const refreshTokens = async (refreshToken) => {
 
 const authenticate = async (req, res, next) => {
   try {
-    // let userId = null;
-    // const token = req.headers.authorization;
+    let userId = null;
+    const token = (req.headers.authorization);
 
-    // userId = jwt.verify(token, secretKey).user.id;
-    // const user = User.findOne({ where: { id: userId } });
-    const user = await User.findOne({ where: { id: 7 } });
+    userId = jwt.verify(token, secretKey).user;
+
+    const user = await User.findOne({ where: { id: userId } });
 
     if (!user) {
       res.json({ success: false, message: 'Пользователь не существует.' });

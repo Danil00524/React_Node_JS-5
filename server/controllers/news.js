@@ -4,7 +4,7 @@ const allNews = async (req, res) => {
   try {
     const news = await New.findAll();
 
-    res.json({ news });
+    res.json(news);
   } catch (error) {
     res.json({
       success: false,
