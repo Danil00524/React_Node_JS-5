@@ -5,12 +5,10 @@ module.exports = (sequelize, DataTypes) => {
     R: DataTypes.BOOLEAN,
     U: DataTypes.BOOLEAN,
     D: DataTypes.BOOLEAN,
-    userId: DataTypes.INTEGER
+    __id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4
+    }
   }, {});
-  permissionChat.associate = function(models) {
-    permissionChat.belongsTo(models.users, {
-      foreignKey: 'userId'
-    })
-  };
   return permissionChat;
 };

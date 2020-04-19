@@ -4,7 +4,10 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const bodyParser = require("body-parser");
+const http = require('http');
+const socket = require('socket.io');
 const app = express();
+
 
 const db = require(path.join(__dirname, './db'));
 db.authenticate()
@@ -37,6 +40,28 @@ if (process.env.NODE_ENV === 'production') {
   })
 }
 
+const server = http.createServer();
+const io = socket(server);
+
+let connectedUsers = {};
+
+io.on('connection', socket => {
+  let user = {
+    id: socket.id,
+    username: socket.handshake.headers.username
+  };
+  connectedUsers[socket.id] = user;
+  socket.emit('all users', connectedUsers);
+  io.sockets.emit('new user', user);
+  socket.on('chat message', function(msg, user) {
+    socket.broadcast.to(user).emit('chat message', msg, socket.id);
+  });
+  socket.on('disconnect', function() {
+    io.sockets.emit('delete user', socket.id);
+    delete connectedUsers[socket.id];
+  });
+});
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
@@ -55,8 +80,7 @@ app.use(function (err, req, res, next) {
 
 const port = process.env.PORT ? process.env.PORT : 3000;
 
-app.listen(port, function () {
-  console.log(`Example app listening on port ${port}!`);
-});
+server.listen(port);
+console.log(`Example app listening on port ${port}!`);
 
 module.exports = app;
